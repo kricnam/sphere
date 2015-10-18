@@ -32,13 +32,27 @@
 (sqrt (apply #'+ (mapcar #'* x x)))))
 
 
-(defun min_line(pts) 
+(defun min_edge_length(pts) 
 "get edge"
-(let ((pt (car pts)) (ptlist (cdr pts)) (a))
-  (loop for p in ptlist do (push (list (distance pt p)  p pt) a))
-(print a)))
+(let ((pt (car pts)) (ptlist (cdr pts)) (length '()))
+  (loop for p in ptlist do (push (distance pt p)  length))
+(apply 'min length)))
+
+(defun edge_from_vertex (pts size)
+""
+(let ((pt (car pts)) (ptlist (cdr pts)) (edges '()))
+(loop for p in ptlist do ( 
+ if (< (- (distance pt p) size) (/ size 10))
+         (push (list p pt) edges)) 
+(return edges)
+)))
 
 
+
+
+
+
+ 
 
 
 
