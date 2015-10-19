@@ -65,3 +65,10 @@
        )
     ))
 
+(defun print_draw_lines (edges)
+ (loop for edge in edges do
+   (format t "(command \"line\" '~S '~S \"\")~%" (car edge) (car (cdr edge))) 
+      
+))
+
+ 
