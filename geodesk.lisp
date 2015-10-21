@@ -110,7 +110,6 @@
          (loop for pt in edge do
               (if (find pt vertex :test #'equal) ()
                   (push pt vertex))
-
               ))
     (setq vertex vertex)
     ))
@@ -118,19 +117,18 @@
 (defun sibling_vertex_on_edge_vertex(vertex edge edges)
   (let ((pts ) (sibling_edge))
     (loop for e in edges do
-         (if (find vertex e :test #'equal) ( push e sibling_edge)))
-    (setf sibling_edge (remove edge sibling_edge))
+         (if (find vertex e :test #'equal) (push e sibling_edge)))
+    (setf sibling_edge (remove edge sibling_edge :test #'equal))
     (setf pts (edges_to_vertex sibling_edge))
     (setf pts (remove vertex pts :test #'equal))
     ))
 
 (defun generate_sub_edges (edge edges)
-  (let* ((pts (edges_to_vertex edge))
-         (vtx (sibling_vertex_on_edge_vertex (car pts) edge edges))
-         (center1 ) )
-    (print pts)
-    (
-     setf center1 (circumcenter (append pts (list (car vtx))))
+  (let* ((pts (reverse (edges_to_vertex (list edge)))) ;;use reverse to restore the order of points
+         (vtx)
+         (center) )
+    (setf vtx (sibling_vertex_on_edge_vertex (car pts) edge edges))
+    (setf center (circumcenter (append pts (list (car vtx))))
      )
     ))
 
@@ -143,3 +141,4 @@
     (edges_to_vertex result)
     )
   )
+
