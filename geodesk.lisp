@@ -26,6 +26,8 @@
     )
   )
 
+(defvar *center* '(0 0 0))
+
 (defun distance (pt1 pt2)
   "Return the distance of two point, in cartesion coordiation"
   (let ((x  (mapcar #'- pt1 pt2)))
@@ -99,7 +101,6 @@
     (loop for te in trans do
          (setf carte (append carte (list (apply '+ (mapcar #'* barycentric te)))))
          )
-    (print carte)
     (return-from circumcenter carte)
     ))
 
@@ -126,10 +127,19 @@
 (defun generate_sub_edges (edge edges)
   (let* ((pts (reverse (edges_to_vertex (list edge)))) ;;use reverse to restore the order of points
          (vtx)
-         (center) )
+         (centers) (sub_point) (sub_edge))
     (setf vtx (sibling_vertex_on_edge_vertex (car pts) edge edges))
-    (setf center (circumcenter (append pts (list (car vtx))))
-     )
+    (setf centers (list (circumcenter (append pts (list (car vtx))))))
+    (setf centers (append centers (list (circumcenter (append pts (cdr vtx))))))
+    (loop for c in centers
+       do
+         (loop for p in pts
+             do (setf sub_point (append sub_point (list (map_circle_point (mid_point p c) (distance p *center*))))
+                      )
+          finally (progn (setf sub_edge (append sub_edge (list sub_point))) (setf sub_point ()))
+          )
+         )
+    (print sub_edge)
     ))
 
 (defun split_sphere (edges)
@@ -142,3 +152,21 @@
     )
   )
 
+(defun angle (center pa pb)
+  "Calcult the angle of center by the law of cosines, center/a/b are triangle's three point, each point denote as (x y z)"
+  (let ((a (distance center pa))
+        (b (distance center pb))
+        (c (distance pa pb)))
+    (acos (/ (+ (expt a 2) (expt b 2) (- (expt c 2))) (* 2 a b)))
+    ))
+
+(defun mid_point (a b)
+  (mapcar #'(lambda (x y) (/ (+ x y) 2)) a b)
+  )
+
+(defun map_circle_point (x r)
+  "project the point x (X Y Z) to the sphere surface with radiant r"
+  (let* ((ratio (/ r (distance x *center*)))
+         )
+    (mapcar #'(lambda(x) (* x ratio)) x)
+    ))
