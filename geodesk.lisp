@@ -104,12 +104,21 @@
     (return-from circumcenter carte)
     ))
 
+(defun point_in_list (pt pt_list)
+  (loop for p in pt_list
+     if (< (distance pt p) 0.001)
+       do (return pt)
+     finally
+       (return nil)
+       )
+  )
+
 (defun edges_to_vertex (edges)
   (let ((vertex nil))
     (loop for edge in edges do
 
          (loop for pt in edge do
-              (if (find pt vertex :test #'equal) ()
+              (if (and vertex (point_in_list pt vertex)) ()
                   (push pt vertex))
               ))
     (setq vertex vertex)
@@ -124,6 +133,7 @@
     (setf pts (remove vertex pts :test #'equal))
     ))
 
+
 (defun generate_sub_edges (edge edges)
   (let* ((pts (reverse (edges_to_vertex (list edge)))) ;;use reverse to restore the order of points
          (vtx)
@@ -134,12 +144,17 @@
     (loop for c in centers
        do
          (loop for p in pts
-             do (setf sub_point (append sub_point (list (map_circle_point (mid_point p c) (distance p *center*))))
-                      )
-          finally (progn (setf sub_edge (append sub_edge (list sub_point))) (setf sub_point ()))
-          )
+            do (setf sub_point (append sub_point (list (map_circle_point (mid_point p c) (distance p *center*))))
+                     )
+            finally (progn
+
+                      (setf sub_edge (append sub_edge (list sub_point)))
+
+                      (setf sub_point ()))
+              )
+       finally (return sub_edge)
          )
-    (print sub_edge)
+
     ))
 
 (defun split_sphere (edges)
