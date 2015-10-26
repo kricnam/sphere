@@ -59,7 +59,7 @@
   "return the edge list of given vertex set"
   (let ((min_size (min_edge_length pts)) (edges '()) )
     (loop
-       (setq edges (append edges (edge_from_vertex_step pts min_size)))
+       (setq edges (append edges (edge_from_vertex_step pts (min_edge_length pts))))
        (if (> (length pts) 2)
            (setf pts (cdr pts))
            (return-from edge_from_vertex edges)
