@@ -107,7 +107,7 @@
 (defun point_in_list (pt pt_list)
   (loop for p in pt_list
      if (< (distance pt p) 0.001)
-       do (return pt)
+     do (return pt)
      finally
        (return nil)
        )
@@ -137,15 +137,19 @@
 (defun generate_sub_edges (edge edges)
   (let* ((pts (reverse (edges_to_vertex (list edge)))) ;;use reverse to restore the order of points
          (vtx)
-         (centers) (sub_point) (sub_edge))
+         (centers) (sub_point) (sub_edge) (len)
+         (radius (distance *center* (car pts)))
+         )
     (setf vtx (sibling_vertex_on_edge_vertex (car pts) edge edges))
     (setf centers (list (circumcenter (append pts (list (car vtx))))))
     (setf centers (append centers (list (circumcenter (append pts (cdr vtx))))))
+    (setf len (/ (distance (car edge) (car (cdr edge))) 2))
+
     (loop for c in centers
        do
          (loop for p in pts
-            do (setf sub_point (append sub_point (list (map_circle_point (mid_point p c) (distance p *center*))))
-                     )
+            do
+              (setf sub_point (append sub_point (list (map_circle_point (split_point p c (split_ratio len (distance p c) radius) ) radius))))
             finally (progn
 
                       (setf sub_edge (append sub_edge (list sub_point)))
@@ -175,9 +179,13 @@
     (acos (/ (+ (expt a 2) (expt b 2) (- (expt c 2))) (* 2 a b)))
     ))
 
-(defun mid_point (a b)
-  (mapcar #'(lambda (x y) (/ (+ x y) 2)) a b)
+(defun split_point (a b ratio)
+  "return the split point coordinate. for line AB, split by C,
+ ratio = AC/CB , a and b denote as (x y z)"
+  (mapcar #'(lambda (x y) (/ (+ x (* y ratio)) (+ 1 ratio))) a b)
   )
+
+
 
 (defun map_circle_point (x r)
   "project the point x (X Y Z) to the sphere surface with radiant r"
@@ -185,3 +193,15 @@
          )
     (mapcar #'(lambda(x) (* x ratio)) x)
     ))
+
+(defun chord_to_angle(size r)
+  "return the angle of a chord span in a circle with radius r"
+  (* (asin (/ size (* 2 r))) 2)
+  )
+
+(defun split_ratio (target_chord_size init_chord_size r)
+  "calculate the ratio,  of which the desired edge length map to an initial chord"
+  (let* ((target_angle  (chord_to_angle target_chord_size r))
+         (init_angle (chord_to_angle init_chord_size r))
+         (left_angle (- init_angle target_angle)))
+    (/ (sin target_angle) (sin left_angle))))
