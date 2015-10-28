@@ -59,7 +59,7 @@
   "return the edge list of given vertex set"
   (let ((min_size (min_edge_length pts)) (edges '()) )
     (loop
-       (setq edges (append edges (edge_from_vertex_step pts (min_edge_length pts))))
+       (setq edges (append edges (edge_from_vertex_step pts min_size)))
        (if (> (length pts) 2)
            (setf pts (cdr pts))
            (return-from edge_from_vertex edges)
@@ -144,16 +144,17 @@
     (setf centers (list (circumcenter (append pts (list (car vtx))))))
     (setf centers (append centers (list (circumcenter (append pts (cdr vtx))))))
     (setf len (/ (distance (car edge) (car (cdr edge))) 2))
-
+    (format t "~S,~S   ~D~%" (car edge) (car (cdr edge)) len)
+    (format t "center:~S~%" centers)
     (loop for c in centers
        do
          (loop for p in pts
             do
-              (setf sub_point (append sub_point (list (map_circle_point (split_point p c (split_ratio len (distance p c) radius) ) radius))))
+              (setf sub_point (append sub_point (list (project_circle_point (split_point p  c (split_ratio len (distance p c) radius) ) radius))))
             finally (progn
 
                       (setf sub_edge (append sub_edge (list sub_point)))
-
+                      (format t "~S  ~D ~D~%" sub_point (distance (car sub_point) (car (cdr sub_point))) (distance (car pts) (car sub_point)))
                       (setf sub_point ()))
               )
        finally (return sub_edge)
@@ -187,7 +188,7 @@
 
 
 
-(defun map_circle_point (x r)
+(defun project_circle_point (x r)
   "project the point x (X Y Z) to the sphere surface with radiant r"
   (let* ((ratio (/ r (distance x *center*)))
          )
@@ -205,3 +206,8 @@
          (init_angle (chord_to_angle init_chord_size r))
          (left_angle (- init_angle target_angle)))
     (/ (sin target_angle) (sin left_angle))))
+
+
+(defun edge_length (edge)
+  (distance (car edge) (car (cdr edge)))
+  )
