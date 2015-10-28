@@ -26,6 +26,13 @@
     )
   )
 
+(defun truncked_icosahedron_vertex ()
+(list
+(list )
+)
+)
+
+
 (defvar *center* '(0 0 0))
 
 (defun distance (pt1 pt2)
@@ -150,7 +157,7 @@
        do
          (loop for p in pts
             do
-              (setf sub_point (append sub_point (list (project_circle_point (split_point p  c (split_ratio len (distance p c) radius) ) radius))))
+              (setf sub_point (append sub_point (list (project_circle_point (split_point p  c (split_ratio len (distance p (project_circle_point c radius)) radius) ) radius))))
             finally (progn
 
                       (setf sub_edge (append sub_edge (list sub_point)))
@@ -205,8 +212,8 @@
   (let* ((target_angle  (chord_to_angle target_chord_size r))
          (init_angle (chord_to_angle init_chord_size r))
          (left_angle (- init_angle target_angle)))
-    (/ (sin target_angle) (sin left_angle))))
-
+     (- (/ (tan init_angle) (tan left_angle)) 1)
+))
 
 (defun edge_length (edge)
   (distance (car edge) (car (cdr edge)))
