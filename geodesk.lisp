@@ -197,21 +197,6 @@
     (edges_to_vertex result)
     )
   )
-On branch master
-Your branch is up-to-date with 'origin/master'.
-
-Changes not staged for commit:
-  (use "git add <file>..." to update what will be committed)
-  (use "git checkout -- <file>..." to discard changes in working directory)
-
-	modified:   geodesk.lisp
-
-Untracked files:
-  (use "git add <file>..." to include in what will be committed)
-
-	geodesk.fasl
-
-no changes added to commit (use "git add" and/or "git commit -a")
 
 (defun angle (center pa pb)
   "Calcult the angle of center by the law of cosines, center/a/b are triangle's three point, each point denote as (x y z)"
