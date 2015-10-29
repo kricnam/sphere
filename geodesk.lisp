@@ -27,10 +27,10 @@
   )
 
 (defun truncked_icosahedron_vertex ()
-(list
-(list )
-)
-)
+  (list
+   (list )
+   )
+  )
 
 
 (defvar *center* '(0 0 0))
@@ -151,8 +151,8 @@
     (setf centers (list (circumcenter (append pts (list (car vtx))))))
     (setf centers (append centers (list (circumcenter (append pts (cdr vtx))))))
     (setf len (/ (distance (car edge) (car (cdr edge))) 2))
-    (format t "~S,~S   ~D~%" (car edge) (car (cdr edge)) len)
-    (format t "center:~S~%" centers)
+                                        ;(format t "~S,~S   ~D~%" (car edge) (car (cdr edge)) len)
+                                        ;(format t "center:~S~%" centers)
     (loop for c in centers
        do
          (loop for p in pts
@@ -172,12 +172,46 @@
 (defun split_sphere (edges)
   (let* ((result))
     (loop for edge in edges do
-         (setf result (append result (generate_sub_edges edge edges)))
+         (setf result (append result (generate_split_edge edge edges)))
          )
     (setf result (append result edges))
     (edges_to_vertex result)
     )
   )
+
+(defun generate_split_edge (edge edges)
+  (let* (
+         (sibling_vtx (sibling_vertex_on_edge_vertex (car edge) edge edges))
+         (a (circumcenter (append edge (list (car sibling_vtx)))))
+         (b (circumcenter (append edge (list (cadr sibling_vtx)))))
+         (radius (distance (car edge) *center*))
+         )
+    (triple_split_chord (mapcar #'(lambda(x) (project_circle_point x  radius))  (list a b)))
+    ))
+
+(defun split_sphere_3x (edges)
+  (let* ((result))
+    (loop for edge in edges do
+         (setf result (append result (list (generate_split_edge edge edges))))
+         )
+    (edges_to_vertex result)
+    )
+  )
+On branch master
+Your branch is up-to-date with 'origin/master'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+	modified:   geodesk.lisp
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+	geodesk.fasl
+
+no changes added to commit (use "git add" and/or "git commit -a")
 
 (defun angle (center pa pb)
   "Calcult the angle of center by the law of cosines, center/a/b are triangle's three point, each point denote as (x y z)"
@@ -212,9 +246,24 @@
   (let* ((target_angle  (chord_to_angle target_chord_size r))
          (init_angle (chord_to_angle init_chord_size r))
          (left_angle (- init_angle target_angle)))
-     (- (/ (tan init_angle) (tan left_angle)) 1)
-))
+    (- (/ (tan init_angle)  (tan left_angle)) 1)
+    ))
 
 (defun edge_length (edge)
   (distance (car edge) (car (cdr edge)))
+  )
+
+
+(defun triple_split_chord (edge)
+  "Given two ponit of chord, retune the two points in the circle,that triple split the angle of chord spanned. note: will fail when the angle is pi"
+  (let* (
+         (radius (distance (car edge) *center*))
+         (angle (chord_to_angle (edge_length edge) radius))
+         (side_angle (/ (- pi angle) 2))
+         (part_len (* (/ radius (sin (- pi (/ angle 3) side_angle))) (sin (/ angle 3))))
+         (full_len (distance (car edge) (cadr edge)))
+         (point_a (split_point (car edge) (cadr edge) (/ part_len (- full_len part_len))))
+         (point_b (split_point (car edge) (cadr edge) (/ (- full_len part_len) part_len))))
+    (list (project_circle_point point_a radius) (project_circle_point point_b radius))
+    )
   )
